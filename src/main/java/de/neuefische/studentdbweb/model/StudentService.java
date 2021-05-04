@@ -1,34 +1,33 @@
 package de.neuefische.studentdbweb.model;
 
+import de.neuefische.studentdbweb.database.StudentDatabase;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class StudentService {
 
-    private final List<Student> students = new ArrayList<>();
+    private final StudentDatabase studentDatabase;
+
+    public StudentService(StudentDatabase studentDatabase) {
+        this.studentDatabase = studentDatabase;
+    }
 
     public List<Student> list() {
-        return students;
+        return studentDatabase.list();
     }
 
     public Optional<Student> findById(String id) {
-        for (Student student : students) {
-            if (student.getId().equals(id)) {
-                return Optional.of(student);
-            }
-        }
-        return Optional.empty();
+        return studentDatabase.findById(id);
     }
 
     public List<Student> search(String search) {
         List<Student> searchedStudents = new ArrayList<>();
-        for (Student student : students) {
-            if (student.getName().contains(search)) {
+        for (Student student : studentDatabase.list()) {
+            if (student.getName().toLowerCase().contains(search.toLowerCase())) {
                 searchedStudents.add(student);
             }
         }
@@ -36,7 +35,7 @@ public class StudentService {
     }
 
     public void add(Student student) {
-        students.add(student);
+        studentDatabase.add(student);
     }
 
 }
