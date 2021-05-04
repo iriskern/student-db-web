@@ -2,23 +2,29 @@ package de.neuefische.studentdbweb.controller;
 
 import de.neuefische.studentdbweb.model.Student;
 import de.neuefische.studentdbweb.model.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("student")
 public class StudentController {
 
-    private final StudentService studentService = new StudentService(List.of(
-            new Student("15", "Anna"),
-            new Student("16", "Paul"),
-            new Student("17", "John"),
-            new Student("18", "Sarah")
-    ));
+    private StudentService studentService;
+
+    @Autowired
+    public StudentController(StudentService studentService) {
+        this.studentService = studentService;
+    }
 
     @GetMapping
     public List<Student> listStudents(@RequestParam Optional<String> search) {
@@ -39,7 +45,7 @@ public class StudentController {
     }
 
     @PutMapping("{id}")
-    public Student addStudent(@PathVariable String id, @RequestBody Student student) {
+    public Student addStudent(@PathVariable String id, @Valid @RequestBody Student student) {
         if (student.getId().equals(id)) {
             studentService.add(student);
             if (studentService.findById(id).isPresent()) {
@@ -49,5 +55,17 @@ public class StudentController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student id not correct");
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
+    }
 
 }

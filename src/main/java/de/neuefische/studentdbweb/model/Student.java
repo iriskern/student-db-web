@@ -1,10 +1,17 @@
 package de.neuefische.studentdbweb.model;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 public class Student {
 
+    @NotBlank (message = "id must contain numbers")
+    @Size(min=2, max=100, message = "id must be at least two numbers")
     private String id;
+
+    @NotBlank(message = "Please enter a name")
+    @Size(min=2, max=30, message = "Name is too short or too long")
     private String name;
 
     public Student(String id, String name) {
