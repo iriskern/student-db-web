@@ -2,7 +2,9 @@ package de.neuefische.studentdbweb.controller;
 
 import de.neuefische.studentdbweb.model.Student;
 import de.neuefische.studentdbweb.model.StudentService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,8 +42,11 @@ public class StudentController {
     public Student addStudent(@PathVariable String id, @RequestBody Student student) {
         if (student.getId().equals(id)) {
             studentService.add(student);
+            if (studentService.findById(id).isPresent()) {
+                return studentService.findById(id).get();
+            }
         }
-        return studentService.findById(id).isPresent() ? studentService.findById(id).get() : null;
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student id not correct");
     }
 
 
